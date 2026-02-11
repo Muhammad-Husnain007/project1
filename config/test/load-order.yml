@@ -1,0 +1,22 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 1
+      arrivalCount: 2 # 100 users ek sath hit karenge
+      name: "Flash Sale Burst"
+  processor: "./processor.cjs"
+
+scenarios:
+  - name: "Race Condition Test"
+    flow:
+      - post:
+          url: "/api/v1/order/{{ userId }}"
+          beforeRequest: "prepareOrderData"
+          json:
+            basket: "{{ basket }}"
+            shippingAddress: "{{ shippingAddress }}"
+            paymentMethod: "{{ paymentMethod }}"
+            pricing: "{{ pricing }}"
+
+# ///////////////////////// Reproduce Idempotency case ///////
+

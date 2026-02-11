@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+    body { background: #f4f6f8; display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 240px;
+      background: #1f2933;
+      color: #fff;
+      padding: 20px;
+    }
+    .sidebar h2 { margin-bottom: 30px; text-align: center; }
+    .sidebar li {
+      list-style: none;
+      padding: 12px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .sidebar li:hover { background: #374151; }
+
+    .main { flex: 1; padding: 20px; }
+
+    .header {
+      background: #fff;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .card p { font-size: 26px; font-weight: bold; }
+
+    table {
+      width: 100%;
+      background: #fff;
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td { padding: 12px; text-align: left; }
+    thead { background: #1f2933; color: #fff; }
+    tr:nth-child(even) { background: #f9fafb; }
+
+    .section-title {
+      margin: 25px 0 10px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>Admin Panel</h2>
+    <li onclick="loadUsers()">Users</li>
+    <li onclick="loadProducts()">Products</li>
+    <li onclick="loadOrders()">Orders</li>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <div class="header">
+      <h1>Dashboard</h1>
+      <span>Welcome Admin</span>
+    </div>
+
+    <!-- STATS -->
+    <div class="cards">
+      <div class="card">
+        <h3>Total Users</h3>
+        <p id="totalUsers">0</p>
+      </div>
+      <div class="card">
+        <h3>Total Products</h3>
+        <p id="totalProducts">0</p>
+      </div>
+      <div class="card">
+        <h3>Total Orders</h3>
+        <p id="totalOrders">0</p>
+      </div>
+    </div>
+
+    <h2 class="section-title" id="tableTitle">Users</h2>
+
+    <!-- TABLE -->
+    <table>
+      <thead>
+        <tr id="tableHead"></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+  </div>
+
+<script>
+const tableHead = document.getElementById('tableHead')
+const tableBody = document.getElementById('tableBody')
+const tableTitle = document.getElementById('tableTitle')
+
+// ================= STATS =================
+async function loadStats() {
+  const res1 = await fetch('http://localhost:3000/api/v1/user')
+  const res2 = await fetch('http://localhost:3000/api/v1/product')
+  const res3 = await fetch('http://localhost:3000/api/v1/order')
+  const data1 = await res1.json()
+  const data2 = await res2.json()
+  const data3 = await res3.json()
+  // console.log('====', data1.length)
+  document.getElementById('totalUsers').innerText = data1.data.length
+  document.getElementById('totalProducts').innerText = data2.data.length
+  document.getElementById('totalOrders').innerText = data3.data.length
+}
+
+// ================= USERS =================
+async function loadUsers() {
+  tableTitle.innerText = 'Users'
+  tableHead.innerHTML = `
+    <th>Username</th>
+    <th>Class</th>
+    <th>Verified</th>
+  `
+  tableBody.innerHTML = ''
+
+  const res = await fetch('http://localhost:3000/api/v1/user')
+  console.log(res)
+  const users = await res.json()
+console.log(users.data)
+  users.data.forEach(u => {
+    tableBody.innerHTML += `
+      <tr>
+        <td>${u.username}</td>
+        <td>${u.class}</td>
+        <td>${u.verified ? 'Yes' : 'No'}</td>
+      </tr>
+    `
+  })
+}
+
+// ================= PRODUCTS =================
+async function loadProducts() {
+  tableTitle.innerText = 'Products'
+  tableHead.innerHTML = `
+    <th>Name</th>
+    <th>Price</th>
+    <th>Status</th>
+  `
+  tableBody.innerHTML = ''
+
+  const res = await fetch('http://localhost:3000/api/v1/product')
+  const products = await res.json()
+
+  products.forEach(p => {
+    tableBody.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.price}</td>
+        <td>${p.status}</td>
+      </tr>
+    `
+  })
+}
+
+// ================= ORDERS =================
+async function loadOrders() {
+  tableTitle.innerText = 'Orders'
+  tableHead.innerHTML = `
+    <th>Order ID</th>
+    <th>User</th>
+    <th>Total</th>
+    <th>Status</th>
+  `
+  tableBody.innerHTML = ''
+
+  const res = await fetch('http://localhost:3000/api/v1/order')
+  const orders = await res.json()
+
+  orders.forEach(o => {
+    tableBody.innerHTML += `
+      <tr>
+        <td>${o._id}</td>
+        <td>${o.user?.username || '-'}</td>
+        <td>${o.total}</td>
+        <td>${o.status}</td>
+      </tr>
+    `
+  })
+}
+
+// LOAD DEFAULT
+loadStats()
+loadUsers()
+</script>
+
+</body>
+</html>

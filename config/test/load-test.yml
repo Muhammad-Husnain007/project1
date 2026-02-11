@@ -1,0 +1,23 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60        # 60 seconds tak test
+      arrivalRate: 10     # 10 requests per second
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 50     # 50 requests per second
+      name: "Sustained load"
+
+scenarios:
+  - name: "Create User Test"
+    flow:
+      - post:
+          url: "/api/v1/user/create-user"
+          json:
+            username: "Test User {{ $randomString() }}"
+            password: "test123"
+      
+  - name: "Get Users"
+    flow:
+      - get:
+          url: "/api/v1/user/create-user"
